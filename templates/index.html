@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resume Screener</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="static\styles.css">
+</head>
+<body>
+<div class="container mt-3">
+    <div class="p-4 bg-header rounded mb-4 shadow-sm animate__animated animate__fadeInDown">
+        <h4>How It Works</h4>
+        <p>
+            This Resume Screener uses an AI model to classify resumes and match them with your selected job role.
+            Upload one or more resumes, select your target role, and click <strong>Analyze</strong>. 
+            The system will identify the top relevant roles and tell you whether the candidate is a fit.
+        </p>
+        <ul>
+            <li>- Select a target role (e.g., Data Scientist, HR)</li>
+            <li>- Upload resumes (PDF or TXT format)</li>
+            <li>- The AI shows the top 3 predicted roles for each resume</li>
+            <li>- If any prediction matches your target role, it's marked as <strong>Fit</strong></li>
+        </ul>
+    </div>
+
+    <div class="form-container animate__animated animate__fadeIn">
+        <h2 class="mb-4 text-center">📤 Upload Resumes</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">🎯 Select Target Role:</label>
+                <select name="target_role" class="form-select">
+                    {% for idx, role in label_map.items() %}
+                        <option value="{{ role }}">{{ role }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">📄 Upload Files:</label>
+                <input type="file" name="resume_files" class="form-control" multiple accept=".txt,.pdf">
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">🔎 Analyze</button>
+            </div>
+        </form>
+        {% if message %}
+        <div class="alert alert-danger mt-3">{{ message }}</div>
+        {% endif %}
+    </div>
+
+    {% if predictions %}
+    <div class="mt-5 animate__animated animate__fadeInUp">
+        <h3 class="mb-3">📊 Results</h3>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for result in predictions %}
+            <div class="col">
+                <div class="card h-100 shadow-sm result-item">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ result.filename }}</h5>
+                        <p class="card-text"><strong>Top Roles:</strong></p>
+                        <ul class="list-unstyled ms-3">
+                            {% for role, score in result.top_k_predictions %}
+                                <li>🔹 {{ role }}</li>
+                            {% endfor %}
+                        </ul>
+                        <span class="badge {{ 'bg-success' if result.is_fit else 'bg-danger' }}">
+                            {{ "✅ Fit" if result.is_fit else "❌ Not Fit" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
